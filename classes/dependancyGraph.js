@@ -1,30 +1,54 @@
 import { createDependancyGraph, resolveRequest } from "../utils/utils";
 import * as babel from "@babel/core";
+const fs = require('fs');
 
-class dependancyGraph {
+let visited = new Set(); // Set to track visited paths
+let currentlyVisiting = new Set(); // Set to track currently visiting paths
+class dependencyGraph {
     constructor(input) {
         this.path = input;
-        this.content = "run <class instance>.init() to run async operations and intialise data";
-        this.ast = "";
-        this.dependencies = ""
-    }
-    async init() {
-        // used to make sure constructor isn't async in nature
-        this.content = await Bun.file(this.path).text();
-        this.ast = await babel.parseAsync(this.content);
-        this.dependencies = await this.getDependencies();
+        this.content = fs.readFileSync(input, "utf-8");
+        this.ast = babel.parseSync(this.content);
+        this.dependencies = this.getDependencies();
     }
 
-    async getDependencies() {
-        // returns dependencies stored in a nested manner within an array
-        return (
-            this.ast.program.body
-                .filter((nd) => nd.type === "ImportDeclaration") // get import statements
-                .map((nd) => nd.source.value) // extract souce path
-                .map((currPath) => resolveRequest(this.path, currPath)) // resolve paths
-                .map(async (absolutePath) => await createDependancyGraph(absolutePath)) // recursively make further dependancyGraph classes and explore their dependencies 
-        )
+    getDependencies() {
+        const dependencies = [];
+
+        for (const node of this.ast.program.body) {
+            if (node.type === "ImportDeclaration") {
+                const currPath = node.source.value;
+                if (!currPath.startsWith('.') && !currPath.startsWith('/')) {
+                    // Not a local import, ignore
+                    continue;
+                }
+
+                const absolutePath = resolveRequest(this.path, currPath);
+
+                // Check for circular dependency
+                if (currentlyVisiting.has(absolutePath)) {
+                    console.warn(`Circular dependency detected at path: ${absolutePath} from ${this.path}`);
+                    continue;
+                }
+                if (visited.has(absolutePath)) continue;
+
+                // Update currently visiting set
+                currentlyVisiting.add(absolutePath);
+
+                // Recursively resolve dependencies
+                const dependencyGraph = createDependancyGraph(absolutePath);
+                dependencies.push(dependencyGraph);
+
+                // Update currently visiting set after exploring dependencies
+                currentlyVisiting.delete(absolutePath);
+
+                // Update visited paths to reflect that this dependencyGraph has been explored
+                visited.add(absolutePath);
+            }
+        }
+
+        return dependencies;
     }
 }
 
-export default dependancyGraph;
+export default dependencyGraph;

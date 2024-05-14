@@ -1,12 +1,12 @@
 
 import dependancyGraph from "../classes/dependancyGraph";
-
+import path from "path"
 export function resolveRequest(filePath, requestedPath) {
-    return path.join(path.dirname(filePath), requestedPath);
+    let resolvedPath= path.join(path.dirname(filePath), requestedPath);
+    if (resolvedPath.slice(0,resolvedPath.length-3) !== ".js") resolvedPath+=".js"
+    return resolvedPath
 }
 
-export async function  createDependancyGraph(input) {
-    const dependancyGraphInstance = new dependancyGraph(input); // creates instance with set path
-    await dependancyGraphInstance.init(); // initialise dependancy graph
-    return dependancyGraphInstance;
+export function  createDependancyGraph(input) {
+    return new dependancyGraph(input); 
 }
