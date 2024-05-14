@@ -5,8 +5,8 @@ export function resolveRequest(filePath, requestedPath) {
     return path.join(path.dirname(filePath), requestedPath);
 }
 
-export function createDependancyGraph(input) {
+export async function  createDependancyGraph(input) {
     const dependancyGraphInstance = new dependancyGraph(input); // creates instance with set path
-    dependancyGraphInstance.init(); // initialise dependancy graph
+    await dependancyGraphInstance.init(); // initialise dependancy graph
     return dependancyGraphInstance;
 }

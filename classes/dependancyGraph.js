@@ -1,6 +1,5 @@
 import { createDependancyGraph, resolveRequest } from "../utils/utils";
-
-const babel = require("@babel/core");
+import * as babel from "@babel/core";
 
 class dependancyGraph {
     constructor(input) {
@@ -13,19 +12,19 @@ class dependancyGraph {
         // used to make sure constructor isn't async in nature
         this.content = await Bun.file(this.path).text();
         this.ast = await babel.parseAsync(this.content);
-        this.dependencies = this.getDependencies();
+        this.dependencies = await this.getDependencies();
     }
 
-    getDependencies() {
+    async getDependencies() {
         // returns dependencies stored in a nested manner within an array
         return (
             this.ast.program.body
-                .filter((nd) => nd.type === "ImportDeclarartion") // get import statements
+                .filter((nd) => nd.type === "ImportDeclaration") // get import statements
                 .map((nd) => nd.source.value) // extract souce path
                 .map((currPath) => resolveRequest(this.path, currPath)) // resolve paths
-                .map((absolutePath) => createDependancyGraph(absolutePath)) // recursively make further dependancyGraph classes and explore their dependencies 
+                .map(async (absolutePath) => await createDependancyGraph(absolutePath)) // recursively make further dependancyGraph classes and explore their dependencies 
         )
     }
 }
 
-module.exports = dependancyGraph;
+export default dependancyGraph;
