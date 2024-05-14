@@ -1,3 +1,5 @@
+import { createDependancyGraph } from "./utils/utils";
+
 async function buildBundledCode({ entryPoint, exitPoint }) {
     // Responsible for reading entry file and building final output
 
