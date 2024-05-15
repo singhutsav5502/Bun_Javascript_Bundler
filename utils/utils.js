@@ -1,13 +1,20 @@
 
+import { endPoints } from "../index";
 import dependancyGraph from "../classes/dependancyGraph";
 import path from "path"
 const fs = require('fs')
+const chalk = require("chalk");
+
+
+
+
+
 function resolveRequest(filePath, requestedPath) {
     let resolvedPath = path.join(path.dirname(filePath), requestedPath);
     return resolvedPath
 }
 
-export function checkJsFileExistsAndResolveRequest(filePath, requestedPath) {
+export function validateFileAndResolvePath(filePath, requestedPath) {
     let absolutePath = resolveRequest(filePath, requestedPath)
 
     try {
@@ -21,7 +28,7 @@ export function checkJsFileExistsAndResolveRequest(filePath, requestedPath) {
         }
     } catch (err) {
         // Handle errors (e.g., file not found)
-        if(err.code === 'ENOENT') console.log(`${absolutePath} does not exist`)
+        if (err.code === 'ENOENT') console.log(`${absolutePath} does not exist`)
         return { absolutePath: null, fileExists: false };
     }
 
@@ -29,6 +36,25 @@ export function checkJsFileExistsAndResolveRequest(filePath, requestedPath) {
 }
 
 
-export function createDependancyGraph(input) {
-    return new dependancyGraph(input);
+export function createDependencyGraph(input) {
+    const dependancyInstance = new dependancyGraph(input);
+    if (input === endPoints.entryPoint) dependancyInstance.isEntryPoint = true;
+    return dependancyInstance;
+}
+
+
+function dfs(dependancyGraph) {
+    const modules = []
+    collect(dependancyGraph, modules);
+
+    return modules
+}
+function collect(dependancyGraph, moduleStore) {
+    moduleStore.push(dependancyGraph);
+    console.log("BREAK!")
+    dependancyGraph?.dependencies?.forEach((dependency) => collect(dependency, moduleStore))
+}
+export function buildGraph(dependancyGraph) {
+    let modules = dfs(dependancyGraph);
+    return modules;
 }

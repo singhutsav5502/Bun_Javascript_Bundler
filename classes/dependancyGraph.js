@@ -1,60 +1,67 @@
-import { createDependancyGraph, checkJsFileExistsAndResolveRequest } from "../utils/utils";
+import { endPoints } from "..";
+import { createDependencyGraph, validateFileAndResolvePath } from "../utils/utils";
 import * as babel from "@babel/core";
 const fs = require('fs');
 const bundlerOptions = require('../bundlerOptions.json')
+
 let visited = new Set(); // Set to track visited paths
 let currentlyVisiting = new Set(); // Set to track currently visiting paths
+
 class dependencyGraph {
     constructor(input) {
         this.path = input;
         this.content = fs.readFileSync(input, "utf-8");
         this.ast = babel.parseSync(this.content);
         this.dependencies = this.getDependencies();
+        this.isEntryPoint = false; // used to mark the entry file and retain its "default exports"
     }
-
-
-    resolvePathDependencies(currPath, dependenciesStore) {
-
-        if (bundlerOptions.onlyLocalImports) {
+    isExternalModule(currPath) {
+        if (bundlerOptions.onlyLocalImports === true && !currPath.startsWith('.') && !currPath.startsWith('/')) {
             // only local imports, ignore
-            return;
+            return true;
         }
         else if (!currPath.startsWith('.') && !currPath.startsWith('/')) {
             // external module import
             console.log(`handle external module import for ${currPath}`)
-            return
+            return true;
         }
-
-        const { absolutePath, fileExists } = checkJsFileExistsAndResolveRequest(this.path, currPath);
-        if (!fileExists) return;
-        // Check for circular dependency
-        if (currentlyVisiting.has(absolutePath)) {
-            console.warn(`Circular dependency detected at path: ${absolutePath} from ${this.path}`);
-            return;
-        }
-        if (visited.has(absolutePath)) return;
-
-        // Update currently visiting set
-        currentlyVisiting.add(absolutePath);
-
-        // Recursively resolve dependencies
-        const dependencyGraph = createDependancyGraph(absolutePath);
-        dependenciesStore.push(dependencyGraph);
-
-        // Update currently visiting set after exploring dependencies
-        currentlyVisiting.delete(absolutePath);
-
-        // Update visited paths to reflect that this dependencyGraph has been explored
-        visited.add(absolutePath);
+        return false;
     }
 
+
     getDependencies() {
-        const dependencies = [];
+        visited.add(endPoints.entryPoint)
+        let dependencies = [];
 
         for (const node of this.ast.program.body) {
             if (node.type === "ImportDeclaration") {
                 const currPath = node.source.value;
-                this.resolvePathDependencies(currPath, dependencies);
+                const isExternalModule = this.isExternalModule(currPath);
+
+                if (isExternalModule) continue;
+                const { absolutePath, fileExists } = validateFileAndResolvePath(this.path, currPath);
+                if (!fileExists) continue
+                // Check for circular dependency
+                if (currentlyVisiting.has(absolutePath)) {
+                    console.warn(`Circular dependency detected at path: ${absolutePath} from ${this.path}`);
+                    continue;
+                }
+                if (visited.has(absolutePath)) continue;
+                // in case of non looping revisit we would want this dependency tree to be stored as well 
+                // can save time by using DP
+
+                // Update currently visiting set
+                currentlyVisiting.add(absolutePath);
+
+                // Recursively resolve dependencies
+                const dependencyGraph = createDependencyGraph(absolutePath);
+                dependencies.push(dependencyGraph);
+
+                // Update currently visiting set after exploring dependencies
+                currentlyVisiting.delete(absolutePath);
+
+                // Update visited paths to reflect that this dependencyGraph has been explored
+                visited.add(absolutePath);
             }
             else if (node.type === "VariableDeclaration") {
                 //  DESIRED STRUCTURE 
@@ -85,12 +92,34 @@ class dependencyGraph {
                         // babels parsed AST has type StringLiteral instead of Literal
                     ) {
                         const currPath = declaration.init.arguments[0].value;
-                        this.resolvePathDependencies(currPath, dependencies);
+                        const isExternalModule = this.isExternalModule(currPath);
+                        if (isExternalModule) continue;
+                        const { absolutePath, fileExists } = validateFileAndResolvePath(this.path, currPath);
+                        if (!fileExists) continue;
+                        // Check for circular dependency
+                        if (currentlyVisiting.has(absolutePath)) {
+                            console.warn(`Circular dependency detected at path: ${absolutePath} from ${this.path}`);
+                            continue;
+                        }
+                        if (visited.has(absolutePath)) continue;
+                        // in case of non looping revisit we would want this dependency tree to be stored as well 
+                        // can save time by using DP
+
+                        // Update currently visiting set
+                        currentlyVisiting.add(absolutePath);
+
+                        // Recursively resolve dependencies
+                        const dependencyGraph = createDependencyGraph(absolutePath);
+                        dependencies.push(dependencyGraph);
+                        // Update currently visiting set after exploring dependencies
+                        currentlyVisiting.delete(absolutePath);
+
+                        // Update visited paths to reflect that this dependencyGraph has been explored
+                        visited.add(absolutePath);
                     }
                 }
             }
         }
-
         return dependencies;
     }
 }
