@@ -1,5 +1,5 @@
 # bun_js_bundler
-
+###currently only has dummy console.log() for external modules
 To install dependencies:
 
 ```bash
