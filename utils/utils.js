@@ -28,7 +28,7 @@ export function validateFileAndResolvePath(filePath, requestedPath) {
         }
     } catch (err) {
         // Handle errors (e.g., file not found)
-        if (err.code === 'ENOENT') console.log(`${absolutePath} does not exist`)
+        if (err.code === 'ENOENT') console.log(`${absolutePath} does not exist or ${requestedPath} is not a .js file`)
         return { absolutePath: null, fileExists: false };
     }
 
