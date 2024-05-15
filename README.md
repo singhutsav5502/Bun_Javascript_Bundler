@@ -21,7 +21,10 @@ To install dependencies:
 ```bash
 bun install
 ```
-
+For help:
+```bash
+bun run index.js --help
+```
 To run:
 
 ```bash
