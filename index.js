@@ -10,9 +10,15 @@ const fs = require('fs/promises');
 /***********************************************/
 // GET END POINTS
 /***********************************************/
-export const { values: endPoints, positionals } = parseArgs({
+const { values, positionals } = parseArgs({
   args: Bun.argv,
   options: {
+    h: {
+      type: 'boolean'
+    },
+    help: {
+      type: 'boolean'
+    },
     entryPoint: {
       type: 'string',
     },
@@ -23,7 +29,7 @@ export const { values: endPoints, positionals } = parseArgs({
   strict: true,
   allowPositionals: true,
 });
-
+export const endPoints = { entryPoint: values.entryPoint, exitPoint: values.exitPoint };
 
 //  validate entry file
 async function validateEndPoints() {
@@ -45,7 +51,15 @@ async function validateEndPoints() {
 };
 
 function main() {
+  if (values.h === true || values.help === true) {
+    console.log("\nto use the bundler run: ")
+    console.log(`"bun run index.js --entryPoint "absolute\\path\\to\\entry\\JS\\file" --exitPoint "absolute\\path\\to\\target\\directory""`)
+    console.log("\nentryPoint flag represents the input .JS file from where the bundler will start mapping dependencies")
+    console.log("exitPoint flag represents the output directory where the bundled file will be written to disk")
+  }
+  console.log("\n")
   validateEndPoints();
   buildBundledCode(endPoints)
+  console.log("\n\nBuild has finished and file is stored at ", endPoints.exitPoint)
 }
 main();
