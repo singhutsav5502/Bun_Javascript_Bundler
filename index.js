@@ -1,6 +1,7 @@
 import { parseArgs } from "util";
+import buildBundledCode from "./bundler";
 /***********************************************/
-// node fs partilly supported by bun. 
+// node fs partially supported by bun. 
 // used here for exit directory path validation
 /***********************************************/
 const fs = require('fs/promises');
@@ -9,7 +10,7 @@ const fs = require('fs/promises');
 /***********************************************/
 // GET END POINTS
 /***********************************************/
-const { values: endPoints, positionals } = parseArgs({
+export const { values: endPoints, positionals } = parseArgs({
   args: Bun.argv,
   options: {
     entryPoint: {
@@ -45,5 +46,6 @@ async function validateEndPoints() {
 
 function main() {
   validateEndPoints();
+  buildBundledCode(endPoints)
 }
 main();

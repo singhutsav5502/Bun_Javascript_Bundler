@@ -1,5 +1,6 @@
 {
-    "bundlerOptions":{
-        "onlyLocalImports":false
-    }
+    
+    "onlyLocalImports":true,
+    "targetFileName": "bundled_index.js"
+    
 }

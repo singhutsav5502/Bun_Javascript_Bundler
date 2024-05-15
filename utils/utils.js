@@ -9,7 +9,7 @@ const chalk = require("chalk");
 
 
 
-function resolveRequest(filePath, requestedPath) {
+export function resolveRequest(filePath, requestedPath) {
     let resolvedPath = path.join(path.dirname(filePath), requestedPath);
     return resolvedPath
 }
@@ -46,12 +46,10 @@ export function createDependencyGraph(input) {
 function dfs(dependancyGraph) {
     const modules = []
     collect(dependancyGraph, modules);
-
     return modules
 }
 function collect(dependancyGraph, moduleStore) {
     moduleStore.push(dependancyGraph);
-    console.log("BREAK!")
     dependancyGraph?.dependencies?.forEach((dependency) => collect(dependency, moduleStore))
 }
 export function buildGraph(dependancyGraph) {
