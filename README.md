@@ -10,7 +10,7 @@ This is a JavaScript bundler designed to streamline the process of combining mul
 
 2. **Circular Dependency Detection:** It identifies and warns developers about any circular dependencies within their codebase, helping to prevent runtime errors and maintain code integrity.
 
-3. **Proper Code Ordering:** It intelligently analyzes the dependencies between JavaScript files and arranges them in the correct order within the bundle. This ensures that modules are loaded and executed in the appropriate sequence, avoiding any potential issues related to undefined variables or functions (temporal dead zones).
+3. **Proper Code Ordering:** It intelligently analyzes the dependencies between JavaScript files and arranges them in topological order. This ensures that modules are loaded and executed in the appropriate sequence, avoiding any potential issues related to undefined variables or functions (temporal dead zones).
 
 4. **Single Bundle Output:** It consolidates all JavaScript files into a single bundle.
 
