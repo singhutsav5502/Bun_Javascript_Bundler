@@ -1,5 +1,8 @@
-# bun_js_bundler
-###currently only has dummy console.log() for external modules
+# Javascript Bundler using Bun
+
+### Currently only has dummy console.log() for External Modules (using npm etc.)
+### supports both import and require statements
+
 To install dependencies:
 
 ```bash
@@ -15,7 +18,7 @@ bun run index.js --entryPoint "absolute\path\to\entry\JS\file" --exitPoint "abso
 bundlerOptions.json:
 ```
 {
-    "onlyLocalImports" (bool)    [default:true] {set to false to add **dummy** processes for external imports}
+    "onlyLocalImports" (bool)    [default:true] {set to false to add dummy processes for external imports}
     "targetFileName"   (string)  [default:"bundled_index.js"] {target file name to be saved to disk}
 }
 ```
