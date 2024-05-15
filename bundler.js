@@ -1,4 +1,4 @@
-import { createDependencyGraph, buildGraph, resolveRequest } from "./utils/utils";
+import { createDependencyGraph, buildGraph } from "./utils/graphUtils";
 import * as babel from "@babel/core"
 import * as fs from "fs"
 import * as path from "path"

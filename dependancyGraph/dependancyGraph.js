@@ -1,5 +1,6 @@
 import { endPoints } from "..";
-import { createDependencyGraph, validateFileAndResolvePath } from "../utils/utils";
+import { validateFileAndResolvePath } from "../utils/utils";
+import { createDependencyGraph } from "../utils/graphUtils";
 import * as babel from "@babel/core";
 const fs = require('fs');
 const bundlerOptions = require('../bundlerOptions.json')
