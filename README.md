@@ -9,7 +9,13 @@ bun install
 To run:
 
 ```bash
-bun run index.js
+bun run index.js --entryPoint "absolute\path\to\entry\JS\file" --exitPoint "absolute\path\to\target\directory"
 ```
 
-This project was created using `bun init` in bun v1.1.8. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+bundlerOptions.json:
+```
+{
+    "onlyLocalImports" (bool)    [default:true] {set to false to add **dummy** processes for external imports}
+    "targetFileName"   (string)  [default:"bundled_index.js"] {target file name to be saved to disk}
+}
+```
